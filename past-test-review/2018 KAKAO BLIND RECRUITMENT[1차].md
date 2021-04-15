@@ -133,3 +133,302 @@ def solution(n, t, m, timetable):
             times = times[num_left:]
 ```
 
+### 캐시 :cd:
+
+어피치에게 시달리는 제이지를 도와, DB 캐시를 적용할 때 캐시 크기에 따른 실행시간 측정 프로그램을 작성하시오.
+
+**입력 형식**
+
+- 캐시 크기(`cacheSize`)와 도시이름 배열(`cities`)을 입력받는다.
+- `cacheSize`는 정수이며, 범위는 0 ≦ `cacheSize` ≦ 30 이다.
+- `cities`는 도시 이름으로 이뤄진 문자열 배열로, 최대 도시 수는 100,000개이다.
+- 각 도시 이름은 공백, 숫자, 특수문자 등이 없는 영문자로 구성되며, 대소문자 구분을 하지 않는다. 도시 이름은 최대 20자로 이루어져 있다.
+
+**출력 형식**
+
+- 입력된 도시이름 배열을 순서대로 처리할 때, "총 실행시간"을 출력한다.
+
+**조건**
+
+- 캐시 교체 알고리즘은 `LRU`(Least Recently Used)를 사용한다.
+- `cache hit`일 경우 실행시간은 `1`이다.
+- `cache miss`일 경우 실행시간은 `5`이다.
+
+**입출력 예제**
+
+| 캐시크기(cacheSize) | 도시이름(cities)                                             | 실행시간 |
+| ------------------- | ------------------------------------------------------------ | -------- |
+| 3                   | ["Jeju", "Pangyo", "Seoul", "NewYork", "LA", "Jeju", "Pangyo", "Seoul", "NewYork", "LA"] | 50       |
+| 3                   | ["Jeju", "Pangyo", "Seoul", "Jeju", "Pangyo", "Seoul", "Jeju", "Pangyo", "Seoul"] | 21       |
+| 2                   | ["Jeju", "Pangyo", "Seoul", "NewYork", "LA", "SanFrancisco", "Seoul", "Rome", "Paris", "Jeju", "NewYork", "Rome"] | 60       |
+
+#### solution
+
+- LRU : 페이지 부재가 발생했을 경우 가장 오랫동안 사용되지 않은 페이지를 제거하는 알고리즘.
+
+```python
+def solution(cacheSize, cities):
+    cache = []
+    answer = 0
+    if cacheSize == 0:
+        return len(cities)*5
+    for c in cities:
+        c = c.lower()
+        if c not in cache:
+            if len(cache)<cacheSize:
+                cache.append(c)
+                answer+=5
+            else:
+                cache.pop(0)
+                cache.append(c)
+                answer+=5
+        else:
+            cache.pop(cache.index(c))
+            cache.append(c)
+            answer+=1
+    return answer
+```
+
+### 다트 게임 :dart:
+
+<details>
+	<summary>Rules of Game</summary>
+    1. 다트 게임은 총 3번의 기회로 구성된다.<br>
+    2. 각 기회마다 얻을 수 있는 점수는 0점에서 10점까지이다.<br>
+    3. 점수와 함께 Single(`S`), Double(`D`), Triple(`T`) 영역이 존재하고 각 영역 당첨 시 점수에서 1제곱, 2제곱, 3제곱 (점수1 , 점수2 , 점수3 )으로 계산된다.<br>
+    4. 옵션으로 스타상(`*`) , 아차상(`#`)이 존재하며 스타상(`*`) 당첨 시 해당 점수와 바로 전에 얻은 점수를 각 2배로 만든다. 아차상(`#`) 당첨 시 해당 점수는 마이너스된다.<br>
+    5. 스타상(`*`)은 첫 번째 기회에서도 나올 수 있다. 이 경우 첫 번째 스타상(`*`)의 점수만 2배가 된다. (예제 4번 참고)<br>
+    6. 스타상(`*`)의 효과는 다른 스타상(`*`)의 효과와 중첩될 수 있다. 이 경우 중첩된 스타상(`*`) 점수는 4배가 된다. (예제 4번 참고)<br>
+    7. 스타상(`*`)의 효과는 아차상(`#`)의 효과와 중첩될 수 있다. 이 경우 중첩된 아차상(`#`)의 점수는 -2배가 된다. (예제 5번 참고)<br>
+    8. Single(`S`), Double(`D`), Triple(`T`)은 점수마다 하나씩 존재한다.<br>
+    9. 스타상(`*`), 아차상(`#`)은 점수마다 둘 중 하나만 존재할 수 있으며, 존재하지 않을 수도 있다.
+
+0~10의 정수와 문자 S, D, T, *, #로 구성된 문자열이 입력될 시 총점수를 반환하는 함수를 작성하라.
+
+**입력 형식**
+
+"점수|보너스|[옵션]"으로 이루어진 문자열 3세트.
+예) `1S2D*3T`
+
+- 점수는 0에서 10 사이의 정수이다.
+- 보너스는 S, D, T 중 하나이다.
+- 옵선은 *이나 # 중 하나이며, 없을 수도 있다.
+
+**출력 형식**
+
+3번의 기회에서 얻은 점수 합계에 해당하는 정수값을 출력한다.
+예) 37
+
+**입출력 예제**
+
+| 예제 | dartResult | answer | 설명                        |
+| ---- | ---------- | ------ | --------------------------- |
+| 1    | `1S2D*3T`  | 37     | 11 * 2 + 22 * 2 + 33        |
+| 2    | `1D2S#10S` | 9      | 12 + 21 * (-1) + 101        |
+| 3    | `1D2S0T`   | 3      | 12 + 21 + 03                |
+| 4    | `1S*2T*3S` | 23     | 11 * 2 * 2 + 23 * 2 + 31    |
+| 5    | `1D#2S*3S` | 5      | 12 * (-1) * 2 + 21 * 2 + 31 |
+| 6    | `1T2D3D#`  | -4     | 13 + 22 + 32 * (-1)         |
+| 7    | `1D2S3T*`  | 59     | 12 + 21 * 2 + 33 * 2        |
+
+#### solution
+
+- string으로 python-like 수식을 만들고 eval(수식)으로 값을 구한다(ex. eval('2*2') => 4)
+- numeric 값이 나오면 temp 리스트에 추가하고, 점수 옵션들의 경우 str을 더해준다
+  - "*"의 경우 앞의 수식에까지 적용되기 때문에 temp의 길이가 2이상일 경우 인덱싱으로 -1, -2에 적용한다.
+
+```python
+def solution(dartResult):
+    area = {'S':'**1', 'D':'**2', 'T':'**3'}
+    temp = [] # +를 기준으로 나뉜 수식들이 담길 리스트
+    for r in dartResult:
+        if r.isnumeric():
+            if not temp:
+                temp.append(r)
+            else:
+                if temp[-1].isnumeric():
+                    temp[-1]+=r
+                else:
+                    temp.append(r)
+            continue
+        if r in area:
+            temp[-1]+=area[r]
+        elif r == '#':
+            temp[-1]+='*(-1)'
+        elif r == '*':
+            if len(temp)>1:
+                temp[-2]+='*2'
+                temp[-1]+='*2'
+            else:
+                temp[-1]+='*2'
+
+    answer = eval('+'.join(temp))
+    return answer
+```
+
+
+
+### 비밀지도:world_map:
+
+1. 지도는 한 변의 길이가 `n`인 정사각형 배열 형태로, 각 칸은 "공백"(" ") 또는 "벽"("#") 두 종류로 이루어져 있다.
+2. 전체 지도는 두 장의 지도를 겹쳐서 얻을 수 있다. 각각 "지도 1"과 "지도 2"라고 하자. 지도 1 또는 지도 2 중 어느 하나라도 벽인 부분은 전체 지도에서도 벽이다. 지도 1과 지도 2에서 모두 공백인 부분은 전체 지도에서도 공백이다.
+3. "지도 1"과 "지도 2"는 각각 정수 배열로 암호화되어 있다.
+4. 암호화된 배열은 지도의 각 가로줄에서 벽 부분을 `1`, 공백 부분을 `0`으로 부호화했을 때 얻어지는 이진수에 해당하는 값의 배열이다.
+
+네오가 프로도의 비상금을 손에 넣을 수 있도록, 비밀지도의 암호를 해독하는 작업을 도와줄 프로그램을 작성하라.
+
+**입력 형식**
+
+입력으로 지도의 한 변 크기 `n` 과 2개의 정수 배열 `arr1`, `arr2`가 들어온다.
+
+- 1 ≦ `n` ≦ 16
+- `arr1`, `arr2`는 길이 `n`인 정수 배열로 주어진다.
+- 정수 배열의 각 원소 `x`를 이진수로 변환했을 때의 길이는 `n` 이하이다. 즉, 0 ≦ `x` ≦ 2n - 1을 만족한다.
+
+**출력 형식**
+
+원래의 비밀지도를 해독하여 `'#'`, `공백`으로 구성된 문자열 배열로 출력하라.
+
+**입출력 예제**
+
+| 매개변수 | 값                                            |
+| -------- | --------------------------------------------- |
+| n        | 5                                             |
+| arr1     | [9, 20, 28, 18, 11]                           |
+| arr2     | [30, 1, 21, 17, 28]                           |
+| 출력     | `["#####","# # #", "### #", "# ##", "#####"]` |
+
+#### solution
+
+- 비트연산자 사용 -> 0b1 | 0b10 -> 0b11
+
+```python
+def solution(n, arr1, arr2):
+    # bin(9)[2:] -> 0b1001
+    _map = [bin(arr1[i]|arr2[i])[2:] for i in range(n)]
+    
+    answer = [' '*(n-len(m))+m.replace('1', '#').replace('0', ' ')  for m in _map]
+    return answer
+```
+
+
+
+### 프렌즈4블록:video_game:
+
+만약 판이 위와 같이 주어질 경우, 라이언이 2×2로 배치된 7개 블록과 콘이 2×2로 배치된 4개 블록이 지워진다. 같은 블록은 여러 2×2에 포함될 수 있으며, 지워지는 조건에 만족하는 2×2 모양이 여러 개 있다면 한꺼번에 지워진다.
+
+블록이 지워진 후에 위에 있는 블록이 아래로 떨어져 빈 공간을 채우게 된다. 만약 빈 공간을 채운 후에 다시 2×2 형태로 같은 모양의 블록이 모이면 다시 지워지고 떨어지고를 반복하게 된다.
+
+**입력 형식**
+
+- 입력으로 판의 높이 `m`, 폭 `n`과 판의 배치 정보 `board`가 들어온다.
+- 2 ≦ `n`, `m` ≦ 30
+- `board`는 길이 `n`인 문자열 `m`개의 배열로 주어진다. 블록을 나타내는 문자는 대문자 A에서 Z가 사용된다.
+
+**출력 형식**
+
+입력으로 주어진 판 정보를 가지고 몇 개의 블록이 지워질지 출력하라.
+
+**입출력 예제**
+
+| m    | n    | board                                                        | answer |
+| ---- | ---- | ------------------------------------------------------------ | ------ |
+| 4    | 5    | ["CCBDE", "AAADE", "AAABF", "CCBBF"]                         | 14     |
+| 6    | 6    | ["TTTANT", "RRFACC", "RRRFCC", "TRRRAA", "TTMMMF", "TMMTTJ"] | 15     |
+
+#### solution
+
+- board --> transpose하여 블록이 떨어지는 것을 조금 더 쉽게 핸들링한다.
+- 터지는 것이 더 이상 없을때까지
+  - 터지는 것이 있는지 탐색
+  - 블록이 터지고 나서의 보드 세팅
+  - 터진 블록의 수 반환
+- reference : https://velog.io/@tjdud0123/%ED%94%84%EB%A0%8C%EC%A6%88-4%EB%B8%94%EB%A1%9D-2018-%EC%B9%B4%EC%B9%B4%EC%98%A4-%EA%B3%B5%EC%B1%84-python
+
+```python
+def pop_num(b, m, n):
+    pop_set = set()
+    # search
+    for i in range(1, n):
+        for j in range(1, m):
+            if b[i][j]==b[i-1][j-1]==b[i][j-1]==b[i-1][j]!='_':
+                # union
+                pop_set |= set([(i, j), (i-1, j-1), (i-1, j), (i, j-1)])
+    # set board
+    for i, j in pop_set:
+        b[i][j] = 0 # 블록이 터진 자리
+    for i, row in enumerate(b):
+        # rearange board
+        empty = ['_']*row.count(0)
+        b[i] = empty+[block for block in row if block!=0]
+    return len(pop_set)
+    
+def solution(m, n, board):
+    answer = 0
+    b = list(map(list, zip(*board))) # transposed
+
+    while True:
+        pop = pop_num(b, m, n)
+        if pop == 0:
+            return answer
+        answer+=pop
+    return answer
+```
+
+### 추석트래픽:maple_leaf:
+
+ **초당 최대 처리량**은 요청의 응답 완료 여부에 관계없이 임의 시간부터 1초(=1,000밀리초)간 처리하는 요청의 최대 개수를 의미한다.
+
+**입력 형식**
+
+- `solution` 함수에 전달되는 `lines` 배열은 **N**(1 ≦ **N** ≦ 2,000)개의 로그 문자열로 되어 있으며, 각 로그 문자열마다 요청에 대한 응답완료시간 **S**와 처리시간 **T**가 공백으로 구분되어 있다.
+- 응답완료시간 **S**는 작년 추석인 2016년 9월 15일만 포함하여 고정 길이 `2016-09-15 hh:mm:ss.sss` 형식으로 되어 있다.
+- 처리시간 **T**는 `0.1s`, `0.312s`, `2s` 와 같이 최대 소수점 셋째 자리까지 기록하며 뒤에는 초 단위를 의미하는 `s`로 끝난다.
+- 예를 들어, 로그 문자열 `2016-09-15 03:10:33.020 0.011s`은 "2016년 9월 15일 오전 3시 10분 **33.010초**"부터 "2016년 9월 15일 오전 3시 10분 **33.020초**"까지 "**0.011초**" 동안 처리된 요청을 의미한다. **(처리시간은 시작시간과 끝시간을 포함)**
+- 서버에는 타임아웃이 3초로 적용되어 있기 때문에 처리시간은 **0.001 ≦ T ≦ 3.000**이다.
+- `lines` 배열은 응답완료시간 **S**를 기준으로 오름차순 정렬되어 있다.
+
+**출력 형식**
+
+- `solution` 함수에서는 로그 데이터 `lines` 배열에 대해 **초당 최대 처리량**을 리턴한다.
+
+**입출력 예제**
+
+예제1
+
+- 입력: [
+  "2016-09-15 01:00:04.001 2.0s",
+  "2016-09-15 01:00:07.000 2s"
+  ]
+- 출력: 1
+
+#### solution
+
+- 시간 변형 -> 1초단위 * 1000
+- (시작, 끝) 에 대해 시작~1초, 끝~1초 구간에 대한 트래픽 처리량을 검사하고 최대값을 answer로 리턴한다.
+
+```python
+def count_traffic(time, _time):
+    count = 0
+    start = time
+    end = time+1000 # 1초간의 트래픽 량 계산
+    for s, e in _time:
+        if e>=start and s <end:
+            count+=1
+    return count
+
+def solution(lines):
+    time_table = []
+    for line in lines:
+        _, time, duration = line.split(' ')
+        h, m, s = time.split(":")
+        end = (int(h)*3600+int(m)*60+float(s))*1000
+        start = end-float(duration[:-1])*1000+1
+        time_table.append([start, end])
+    answer = 1
+    for s, e in time_table:
+        answer = max(answer, count_traffic(s, time_table), count_traffic(e, time_table))
+
+    return answer
+```
+

@@ -1,33 +1,35 @@
-from datetime import datetime, timedelta
-from collections import deque
-pat = "%H:%M:%S.%f"
-sample  =  [
-    "2016-09-15 01:00:04.002 2.0s",
-    "2016-09-15 01:00:07.000 2s"
-    ]
-def split_log(line):
-    temp = line.split()
-    time = datetime.strptime(temp[1], pat)
-    return time-timedelta(seconds=float(temp[2][:-1])+0.001), time, float(temp[2][:-1])
+time_table = dict()
 
-sample = [split_log(s) for s in sample]
-answer = [0]*(len(sample)+1)
-
-_start = sample.pop(0)[0]
-i = 1
-
-while sample:
-    start, end, time = sample.pop(0)
-    print(_start)
-    print(start)
-    if start <= _start + timedelta(seconds = 1):
-        print("passed")
-        answer[i]+=1
+def duplicated(second):
+    if second not in time_table.keys():
+        return second
     else:
-        i+=1
-        _start += timedelta(seconds = 1)
+        return dup(second - 0.000001)
 
-print(answer)
+def solution(lines):
+    for index, line in enumerate(lines):
+        date, time, duration = line.split() # 공백으로 분리
+        h, m, n = time.split(':') # : 시, 분, 초 분리
+        end = int(h) * 60 * 60 + int(m) * 60 + float(n) # 초로 계산
+        duration = float(duration[:-1]) # 뒤에 s 제거
+        start = end - duration + 0.001 - 0.9991
+        
+        time_table[duplicated(start)] = index
+        time_table[duplicated(end)] = index
+        
+    history = []
+    state = [0] * len(lines) # 트래픽이 동작 중인지 현재 상태 / 초기화 다 꺼져있다.
+    
+    for time in sorted(time_table.keys()):
+        index = time_table[time]
+        if state[index] == 0: # 트래픽이 시작이면 켠다.
+            state[index] = 1
+        elif state[index] == 1: # 트래픽이 종료시간이면 끈다.
+            state[index] = 0
+            
+        history.append(state.count(1)) # 현재 동작 중인 트래픽 개수를 센다.
+        #print(index, time, state, state.count(1))
+        
+    return max(history)
 
-
-
+# 출처: https://jeongchul.tistory.com/660 [Jeongchul]
