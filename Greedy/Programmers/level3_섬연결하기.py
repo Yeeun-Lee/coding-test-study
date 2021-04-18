@@ -1,15 +1,18 @@
-#def solution(n, costs):
+# def solution(n, costs):
 #     costs.sort(key = lambda x:x[2])
 #     visited = [False]*n
+#     visited[0] = True
 #     answer = 0
 #     while not all(visited):
 #         for c in costs:
 #             if visited[c[0]] and visited[c[1]]:
 #                 continue
-#             answer+=c[2]
-#             visited[c[0]], visited[c[1]] = True, True
+#             if visited[c[0]] or visited[c[1]]:
+#                 answer+=c[2]
+#                 visited[c[0]], visited[c[1]] = True, True
 #
 #     return answer
+
 def solution(n, costs):
     # kruskal algorithm
     answer = 0
