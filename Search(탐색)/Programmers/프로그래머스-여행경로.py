@@ -1,3 +1,4 @@
+# dfs
 def solution(tickets):
     routes = {}
     for t in tickets:
